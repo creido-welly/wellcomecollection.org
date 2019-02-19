@@ -86,10 +86,12 @@ const StaticWorksContent = () => (
       </div>
     </div>
     <div
-      className={`row bg-cream row--has-wobbly-background ${spacing(
-        { s: 10 },
-        { padding: ['bottom'] }
-      )}`}
+      className={classNames({
+        row: true,
+        'bg-cream': true,
+        'row--has-wobbly-background': true,
+        [spacing({ s: 10 }, { padding: ['bottom'] })]: true,
+      })}
     >
       <div className="container">
         <div className="row__wobbly-background" />
