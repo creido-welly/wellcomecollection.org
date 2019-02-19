@@ -96,17 +96,27 @@ const StaticWorksContent = () => (
       <div className="container">
         <div className="row__wobbly-background" />
         <div className="grid grid--dividers">
-          <div className={grid({ s: 12, m: 10, l: 7, xl: 7 })}>
+          <div
+            className={classNames({
+              [grid({ s: 12, m: 10, l: 7, xl: 7 })]: true,
+            })}
+          >
             <h2
-              className={`${font({ s: 'WB6', m: 'WB4' })} ${spacing(
-                { s: 6 },
-                { margin: ['bottom'] }
-              )} ${spacing({ s: 0 }, { margin: ['top'] })}`}
+              className={classNames({
+                [font({ s: 'WB6', m: 'WB4' })]: true,
+                [spacing({ s: 6 }, { margin: ['bottom'] })]: true,
+                [spacing({ s: 0 }, { margin: ['top'] })]: true,
+              })}
             >
               About the historical images
             </h2>
             <div className="body-text">
-              <div className={`standfirst ${font({ s: 'HNL3', m: 'HNL2' })}`}>
+              <div
+                className={classNames({
+                  standfirst: true,
+                  [font({ s: 'HNL3', m: 'HNL2' })]: true,
+                })}
+              >
                 <p>
                   These artworks and photographs are from the library at
                   Wellcome Collection and have been collected over several
@@ -165,10 +175,10 @@ const StaticWorksContent = () => (
             </div>
           </div>
           <div
-            className={`${grid({ s: 12, m: 8, l: 5, xl: 5 })} ${spacing(
-              { s: 1 },
-              { margin: ['bottom'] }
-            )}`}
+            className={classNames({
+              [grid({ s: 12, m: 8, l: 5, xl: 5 })]: true,
+              [spacing({ s: 1 }, { margin: ['bottom'] })]: true,
+            })}
           >
             <CaptionedImage
               caption={createPrismicParagraph(
