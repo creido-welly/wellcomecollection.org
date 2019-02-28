@@ -1,6 +1,7 @@
 // @flow
 import { iiifImageTemplate } from '@weco/common/utils/convert-image-uri';
-import { Fragment } from 'react';
+import React, { Fragment, useEffect, useRef } from 'react';
+import fetch from 'isomorphic-unfetch';
 import styled from 'styled-components';
 import { classNames } from '../../../utils/classnames';
 import Button from '@weco/common/views/components/Buttons/Button/Button';
@@ -49,6 +50,13 @@ const BookContainer = styled.div`
 
 const ScrollContainer = styled.div`
   overflow-x: scroll;
+  outline: none;
+
+  &:focus::before {
+    content: 'Scroll through the images with arrow keys';
+    position: absolute;
+    margin-top: -1.8em;
+  }
 
   &::-webkit-scrollbar {
     margin-top: ${props => `${props.theme.spacingUnit}px`};
@@ -66,6 +74,13 @@ const ScrollContainer = styled.div`
 
   & > div {
     display: flex;
+  }
+
+  a:focus {
+    outline: none;
+    img {
+      filter: hue-rotate(90deg);
+    }
   }
 `;
 
@@ -89,6 +104,66 @@ const IIIFPresentationDisplay = ({
     [];
 
   const previewSize = 200;
+  const previewArea = useRef(null);
+  const linkRefs = {};
+
+  validSequences.forEach(sequence => {
+    sequence.canvases.forEach(
+      canvas =>
+        (linkRefs[`${canvas.thumbnail.service['@id']}`] = React.createRef())
+    );
+  });
+
+  useEffect(() => {
+    const options = {
+      root: previewArea.current,
+      rootMargin: '0px',
+      threshold: 0.5,
+    };
+
+    function callback(links, observer) {
+      links.forEach(link => {
+        validSequences.forEach(sequence => {
+          const matchingCanvas = sequence.canvases.find(
+            canvas => canvas.thumbnail.service['@id'] === link.target.id
+          );
+          const textService = matchingCanvas.otherContent.filter(
+            content => content.label === 'Text of this page'
+          )[0]['@id'];
+          const test = async function() {
+            try {
+              const textJson = await fetch(textService);
+              const text = await textJson.json();
+              const textArray = text.resources
+                .filter(resource => {
+                  return resource.resource['@type'] === 'cnt:ContentAsText';
+                })
+                .map(resource => resource.resource.chars)
+                .join(' ');
+              link.target
+                .querySelector(':first-child')
+                .setAttribute('alt', textArray); // TODO put on image
+            } catch (e) {}
+          };
+          test();
+        });
+        if (link.isIntersecting) {
+          link.target.setAttribute('tabindex', '0');
+        } else {
+          link.target.setAttribute('tabindex', '-1');
+        }
+      });
+    }
+
+    const observer = new window.IntersectionObserver(callback, options);
+    validSequences.forEach(sequence => {
+      sequence.canvases.forEach(canvas => {
+        observer.observe(
+          linkRefs[`${canvas.thumbnail.service['@id']}`].current
+        );
+      });
+    });
+  }, []);
 
   return (
     <Fragment>
@@ -101,45 +176,64 @@ const IIIFPresentationDisplay = ({
                   <a
                     href={iiifImageTemplate(
                       sequence.canvases[0].thumbnail.service['@id']
-                    )({ size: ',1024' })}
+                    )({ size: '!1024,1024' })}
                   >
                     <img
-                      style={{ width: 'auto', height: '300px' }}
+                      style={
+                        sequence.canvases[0].thumbnail.service.width <=
+                        sequence.canvases[0].thumbnail.service.height
+                          ? { width: 'auto', height: '300px' }
+                          : { width: '300px', height: 'auto' }
+                      }
                       src={iiifImageTemplate(
                         sequence.canvases[0].thumbnail.service['@id']
-                      )({ size: `,${previewSize * 2}` })}
+                      )({ size: `!${previewSize},${previewSize}` })}
                     />
                   </a>
                 </BookContainer>
               )}
               {showMultiImageWorkPreview && (
                 <ScrollContainer
+                  ref={previewArea}
                   key={`${sequence.canvases[0].thumbnail['@id']}-2`}
+                  tabIndex="0"
                 >
                   <div>
                     {sequence.canvases.map((canvas, i) => {
                       return (
                         <a
+                          ref={linkRefs[`${canvas.thumbnail.service['@id']}`]}
+                          id={canvas.thumbnail.service['@id']}
                           key={canvas.thumbnail.service['@id']}
+                          tabIndex={i < 4 ? 0 : -1}
                           href={iiifImageTemplate(
                             canvas.thumbnail.service['@id']
-                          )({ size: ',1024' })}
+                          )({ size: '!1024,1024' })}
                         >
                           <img
                             className={classNames({
                               'lazy-image lazyload': i > 3,
                             })}
-                            style={{
-                              width: 'auto',
-                              height: '300px',
-                              marginRight: '12px',
-                            }}
+                            style={
+                              canvas.thumbnail.service.width <=
+                              canvas.thumbnail.service.height
+                                ? {
+                                    width: 'auto',
+                                    height: '300px',
+                                    marginRight: '12px',
+                                  }
+                                : {
+                                    width: '300px',
+                                    height: 'auto',
+                                    marginRight: '12px',
+                                  }
+                            }
                             src={
                               i < 4
                                 ? iiifImageTemplate(
                                     canvas.thumbnail.service['@id']
                                   )({
-                                    size: `,${previewSize}`,
+                                    size: `!${previewSize},${previewSize}`,
                                   })
                                 : null
                             }
@@ -148,7 +242,7 @@ const IIIFPresentationDisplay = ({
                                 ? iiifImageTemplate(
                                     canvas.thumbnail.service['@id']
                                   )({
-                                    size: `,${previewSize}`,
+                                    size: `!${previewSize},${previewSize}`,
                                   })
                                 : null
                             }
@@ -159,13 +253,13 @@ const IIIFPresentationDisplay = ({
                   </div>
                 </ScrollContainer>
               )}
-              {/* TODO temporary links to large image for ttesting, while we don't have a viewer */}
+              {/* TODO temporary links to large image for testing, while we don't have a viewer */}
               <div>
                 <Button
                   type="primary"
                   url={iiifImageTemplate(
                     sequence.canvases[0].thumbnail.service['@id']
-                  )({ size: ',1024' })}
+                  )({ size: '!1024,1024' })}
                   text={`View all ${sequence.canvases.length} images`}
                   icon="gallery"
                 />
