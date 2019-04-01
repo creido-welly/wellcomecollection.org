@@ -323,9 +323,10 @@ const IIIFViewerComponent = ({
         <IIIFViewerPaginatorButtons>
           <Paginator {...mainPaginatorProps} render={PaginatorButtons} />
         </IIIFViewerPaginatorButtons>
-        {/* TODO make into next links */}
         <Control
-          prefetch={true}
+          prefetch={false}
+          scroll={false}
+          replace={true}
           link={antiClockwiseRotationLink}
           type="light"
           extraClasses={classNames({
@@ -335,7 +336,9 @@ const IIIFViewerComponent = ({
           text={`rotate anti clockwise`}
         />
         <Control
-          prefetch={true}
+          prefetch={false}
+          scroll={false}
+          replace={true}
           link={clockwiseRotationLink}
           type="light"
           extraClasses={classNames({
