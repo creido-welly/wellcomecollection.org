@@ -16,6 +16,7 @@ type Props = {|
   alt: string,
   extraClasses?: string,
   lang: string,
+  rotation?: number,
 |};
 
 const IIIFResponsiveImage = ({
@@ -26,6 +27,7 @@ const IIIFResponsiveImage = ({
   alt,
   extraClasses,
   lang,
+  rotation = 0,
 }: Props) => {
   const urlTemplate = iiifImageTemplate(imageService['@id']);
   const widths = imageService.sizes
@@ -52,11 +54,14 @@ const IIIFResponsiveImage = ({
           },
         })
       }
-      src={urlTemplate({ size: `${initialSrcWidth},` })}
+      src={urlTemplate({ size: `${initialSrcWidth},`, rotation: rotation })}
       srcSet={
         sizes
           ? widths.map(width => {
-              return `${urlTemplate({ size: `${width},` })} ${width}w`;
+              return `${urlTemplate({
+                size: `${width},`,
+                rotation: rotation,
+              })} ${width}w`;
             })
           : undefined
       }

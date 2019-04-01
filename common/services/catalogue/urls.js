@@ -20,6 +20,7 @@ type ItemUrlProps = {|
   sierraId: string,
   langCode: string,
   canvas: number,
+  rotation: number,
 |};
 
 function removeEmpty(obj: Object): Object {
@@ -109,6 +110,7 @@ export function itemUrl({
   sierraId,
   langCode,
   canvas,
+  rotation,
 }: ItemUrlProps): NextLinkType {
   return {
     href: {
@@ -121,6 +123,7 @@ export function itemUrl({
           canvas: canvas && canvas > 1 ? canvas : undefined,
           sierraId: sierraId,
           langCode: langCode,
+          rotation: rotation,
           ...workTypeAndItemsLocationType(workType, itemsLocationsLocationType),
         }),
       },
@@ -133,6 +136,7 @@ export function itemUrl({
         canvas: canvas && canvas > 1 ? canvas : undefined,
         sierraId: sierraId,
         langCode: langCode,
+        rotation: rotation,
         ...workTypeAndItemsLocationType(workType, itemsLocationsLocationType),
       }),
     },

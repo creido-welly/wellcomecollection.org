@@ -227,6 +227,7 @@ export const WorkPage = ({
                 langCode: work.language && work.language.id,
                 page: 1,
                 canvas: 1,
+                rotation: 0,
               })}
             />
           </div>

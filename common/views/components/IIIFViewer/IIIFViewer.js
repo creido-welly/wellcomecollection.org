@@ -239,6 +239,7 @@ type IIIFViewerProps = {|
   sierraId: string,
   pageSize: number,
   canvasIndex: number,
+  rotation: number,
 |};
 
 const IIIFViewerComponent = ({
@@ -256,9 +257,45 @@ const IIIFViewerComponent = ({
   sierraId,
   pageSize,
   canvasIndex,
+  rotation,
 }: IIIFViewerProps) => {
   const mainImageService = {
     '@id': currentCanvas.images[0].resource.service['@id'],
+  };
+
+  // TODO proper icons when available and styling
+  const clockwiseRotationLink = {
+    href: {
+      ...mainPaginatorProps.link.href,
+      query: {
+        ...mainPaginatorProps.link.href.query,
+        rotation: Number(rotation) === 360 ? 90 : Number(rotation) + 90,
+      },
+    },
+    as: {
+      ...mainPaginatorProps.link.as,
+      query: {
+        ...mainPaginatorProps.link.as.query,
+        rotation: Number(rotation) === 360 ? 90 : Number(rotation) + 90,
+      },
+    },
+  };
+
+  const antiClockwiseRotationLink = {
+    href: {
+      ...mainPaginatorProps.link.href,
+      query: {
+        ...mainPaginatorProps.link.href.query,
+        rotation: Number(rotation) === 0 ? 270 : Number(rotation) - 90,
+      },
+    },
+    as: {
+      ...mainPaginatorProps.link.as,
+      query: {
+        ...mainPaginatorProps.link.as.query,
+        rotation: Number(rotation) === 0 ? 270 : Number(rotation) - 90,
+      },
+    },
   };
 
   return (
@@ -280,11 +317,33 @@ const IIIFViewerComponent = ({
             (canvasOcr && canvasOcr.replace(/"/g, '')) ||
             'no text alternative is available for this image'
           }
+          rotation={rotation}
         />
 
         <IIIFViewerPaginatorButtons>
           <Paginator {...mainPaginatorProps} render={PaginatorButtons} />
         </IIIFViewerPaginatorButtons>
+        {/* TODO make into next links */}
+        <Control
+          prefetch={true}
+          link={antiClockwiseRotationLink}
+          type="light"
+          extraClasses={classNames({
+            [spacing({ s: 2 }, { margin: ['right'] })]: true,
+          })}
+          icon="ticketAvailable"
+          text={`rotate anti clockwise`}
+        />
+        <Control
+          prefetch={true}
+          link={clockwiseRotationLink}
+          type="light"
+          extraClasses={classNames({
+            [spacing({ s: 2 }, { margin: ['right'] })]: true,
+          })}
+          icon="clock"
+          text={`rotate clockwise`}
+        />
       </IIIFViewerMain>
 
       <IIIFViewerThumbs>
@@ -303,6 +362,7 @@ const IIIFViewerComponent = ({
                     sierraId,
                     langCode: lang,
                     canvas: pageSize * pageIndex + (i + 1),
+                    rotation,
                   })}
                   scroll={false}
                   replace

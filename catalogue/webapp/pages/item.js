@@ -34,6 +34,7 @@ type Props = {|
   itemsLocationsLocationType: ?(string[]),
   workType: ?(string[]),
   query: ?string,
+  rotation: number,
 |};
 
 async function getCanvasOcr(canvas) {
@@ -73,6 +74,7 @@ const ItemPage = ({
   itemsLocationsLocationType,
   workType,
   query,
+  rotation,
 }: Props) => {
   const canvases = manifest.sequences && manifest.sequences[0].canvases;
   const currentCanvas = canvases && canvases[canvasIndex];
@@ -104,6 +106,7 @@ const ItemPage = ({
       itemsLocationsLocationType,
       langCode,
       sierraId,
+      rotation,
     }),
   };
 
@@ -196,6 +199,7 @@ const ItemPage = ({
           sierraId={sierraId}
           pageSize={pageSize}
           canvasIndex={canvasIndex}
+          rotation={rotation}
         />
       )}
     </PageLayout>
@@ -211,13 +215,13 @@ ItemPage.getInitialProps = async (ctx: Context): Promise<Props> => {
     page = 1,
     pageSize = 4,
     canvas = 1,
+    rotation,
   } = ctx.query;
   const pageIndex = page - 1;
   const canvasIndex = canvas - 1;
   const manifest = await (await fetch(
     `https://wellcomelibrary.org/iiif/${sierraId}/manifest`
   )).json();
-
   const canvases = manifest.sequences && manifest.sequences[0].canvases;
   const currentCanvas = canvases && canvases[canvasIndex];
   const canvasOcr = currentCanvas ? await getCanvasOcr(currentCanvas) : null;
@@ -235,6 +239,7 @@ ItemPage.getInitialProps = async (ctx: Context): Promise<Props> => {
     itemsLocationsLocationType: null,
     workType: null,
     query,
+    rotation,
   };
 };
 
