@@ -1,6 +1,6 @@
 locals {
-  edge_lambda_request_version  = 15
-  edge_lambda_response_version = 16
+  edge_lambda_request_version  = 16
+  edge_lambda_response_version = 17
 }
 
 # Setup terraform for this service
@@ -13,6 +13,14 @@ terraform {
     region         = "eu-west-1"
     bucket         = "wellcomecollection-infra"
   }
+}
+
+provider "random" {
+  version = "~> 2.1"
+}
+
+provider "template" {
+  version = "~> 2.1"
 }
 
 # Make sure we're using AWS as provider
